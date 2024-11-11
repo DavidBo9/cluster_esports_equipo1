@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace cluster.Api
 {
@@ -16,12 +18,14 @@ namespace cluster.Api
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+
+            app.MapGet("/", () => "Hello!");
+            app.MapGet("/(id)", (string id) => "El id es: ");
+
+            app.UseSwaggerUI();
+
+     
 
             app.UseHttpsRedirection();
 
