@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 
 namespace cluster.Shared.Entities
 {
-    public class Country
+    public class Team
     {
         public int Id { get; set; }
+
         [Required]
-        [MaxLength(80, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
-        [Display(Name = "País")]
-        public string Name { get; set; }
+        [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
+        [Display(Name = "Nombre del Equipo")]
+        public string TeamName { get; set; }
+
+        public ICollection<Player> Players { get; set; }
     }
 }
