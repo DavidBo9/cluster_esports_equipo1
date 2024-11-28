@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using cluster.Api.Helpers;
 
 namespace cluster.Api
 {
@@ -14,11 +16,20 @@ namespace cluster.Api
             builder.Services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("con")));
 
+            // Configure JSON serialization to handle cycles
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
+
             // Add Seeder Service
             builder.Services.AddScoped<Seeder>();
 
-            // Add services to the container.
-            builder.Services.AddControllers();
+            // Add Helper Services
+            builder.Services.AddScoped<IUserHelper, UserHelper>();
+            builder.Services.AddScoped<IMatchHelper, MatchHelper>();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -31,7 +42,7 @@ namespace cluster.Api
                 try
                 {
                     var seeder = services.GetRequiredService<Seeder>();
-                    seeder.SeedAsync().Wait(); // Since we're in a sync context, we use Wait()
+                    seeder.SeedAsync().Wait();
                 }
                 catch (Exception ex)
                 {

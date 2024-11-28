@@ -32,7 +32,7 @@ namespace cluster.Api
                         Username = "Fong",
                         Email = "fong@email.com",
                         Password = "123456",
-                        Role = "Admin"
+                        Role = "Player"
                     },
                     new User
                     {
@@ -53,7 +53,7 @@ namespace cluster.Api
                         Username = "Fredos",
                         Email = "fredos@email.com",
                         Password = "123456",
-                        Role = "Player"
+                        Role = "Admin"
                     },
                     new User
                     {
