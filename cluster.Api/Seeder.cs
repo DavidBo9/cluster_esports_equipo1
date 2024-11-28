@@ -1,19 +1,27 @@
 ﻿using cluster.Shared.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+
 namespace cluster.Api
 {
     public class Seeder
     {
         private readonly DataContext dataContext;
+        private readonly UserManager<User> userManager;
+        private readonly RoleManager<IdentityRole> roleManager;
 
-        public Seeder(DataContext dataContext)
+        public Seeder(DataContext dataContext, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             this.dataContext = dataContext;
+            this.userManager = userManager;
+            this.roleManager = roleManager;
         }
 
         public async Task SeedAsync()
         {
             await dataContext.Database.EnsureCreatedAsync();
+            await CheckRolesAsync();
             await CheckUsersAsync();
             await CheckTeamsAsync();
             await CheckTournamentsAsync();
@@ -21,51 +29,32 @@ namespace cluster.Api
             await CheckMatchesAsync();
         }
 
+        private async Task CheckRolesAsync()
+        {
+            if (!await roleManager.RoleExistsAsync("Admin"))
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (!await roleManager.RoleExistsAsync("Player"))
+                await roleManager.CreateAsync(new IdentityRole("Player"));
+        }
+
         private async Task CheckUsersAsync()
         {
-            if (!dataContext.Users.Any())
+            if (!userManager.Users.Any())
             {
-                var users = new List<User>
+                var users = new List<(User user, string password, string role)>
                 {
-                    new User
-                    {
-                        Username = "Fong",
-                        Email = "fong@email.com",
-                        Password = "123456",
-                        Role = "Admin"
-                    },
-                    new User
-                    {
-                        Username = "Chuby",
-                        Email = "chuby@email.com",
-                        Password = "123456",
-                        Role = "Player"
-                    },
-                    new User
-                    {
-                        Username = "Pingul",
-                        Email = "pingul@email.com",
-                        Password = "123456",
-                        Role = "Player"
-                    },
-                    new User
-                    {
-                        Username = "Fredos",
-                        Email = "fredos@email.com",
-                        Password = "123456",
-                        Role = "Player"
-                    },
-                    new User
-                    {
-                        Username = "Fong mi dios",
-                        Email = "fongdios@email.com",
-                        Password = "123456",
-                        Role = "Player"
-                    }
+                    (new User { UserName = "Fong", Email = "fong@email.com" }, "123456", "Admin"),
+                    (new User { UserName = "Chuby", Email = "chuby@email.com" }, "123456", "Player"),
+                    (new User { UserName = "Pingul", Email = "pingul@email.com" }, "123456", "Player"),
+                    (new User { UserName = "Fredos", Email = "fredos@email.com" }, "123456", "Player"),
+                    (new User { UserName = "Fong mi dios", Email = "fongdios@email.com" }, "123456", "Player")
                 };
 
-                dataContext.Users.AddRange(users);
-                await dataContext.SaveChangesAsync();
+                foreach (var (user, password, role) in users)
+                {
+                    await userManager.CreateAsync(user, password);
+                    await userManager.AddToRoleAsync(user, role);
+                }
             }
         }
 
@@ -145,18 +134,18 @@ namespace cluster.Api
 
         private async Task CheckPlayersAsync()
         {
-            if (!dataContext.Players.Any() && dataContext.Users.Any() && dataContext.Teams.Any())
+            if (!dataContext.Players.Any() && userManager.Users.Any() && dataContext.Teams.Any())
             {
-                var users = await dataContext.Users.Where(u => u.Role == "Player").ToListAsync();
+                var users = await userManager.GetUsersInRoleAsync("Player");
                 var teams = await dataContext.Teams.ToListAsync();
                 var players = new List<Player>();
 
-                // Distribute players among teams
-                for (int i = 0; i < users.Count; i++)
+                var usersList = users.ToList();
+                for (int i = 0; i < usersList.Count; i++)
                 {
                     players.Add(new Player
                     {
-                        UserId = users[i].Id,
+                        UserId = int.Parse(usersList[i].Id), // Convert string ID to int
                         TeamId = teams[i % teams.Count].Id,
                         Type = "Professional"
                     });

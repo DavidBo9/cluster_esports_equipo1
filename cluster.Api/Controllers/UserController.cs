@@ -1,7 +1,7 @@
-﻿// Controllers/UsersController.cs
-using cluster.Shared.Entities;
+﻿using cluster.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace cluster.Api.Controllers
 {
@@ -9,23 +9,23 @@ namespace cluster.Api.Controllers
     [Route("/api/users")]
     public class UsersController : ControllerBase
     {
-        private readonly DataContext dataContext;
+        private readonly UserManager<User> _userManager;
 
-        public UsersController(DataContext dataContext)
+        public UsersController(UserManager<User> userManager)
         {
-            this.dataContext = dataContext;
+            _userManager = userManager;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            return Ok(await dataContext.Users.ToListAsync());
+            return Ok(await _userManager.Users.ToListAsync());
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAsync(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAsync(string id)
         {
-            var user = await dataContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -34,30 +34,42 @@ namespace cluster.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync(User user)
+        public async Task<IActionResult> PostAsync([FromBody] User user)
         {
-            dataContext.Users.Add(user);
-            await dataContext.SaveChangesAsync();
-            return Ok(user);
+            var result = await _userManager.CreateAsync(user, user.PasswordHash ?? "DefaultPassword123!");
+            if (result.Succeeded)
+            {
+                return Ok(user);
+            }
+            return BadRequest(result.Errors);
         }
 
         [HttpPut]
-        public async Task<IActionResult> PutAsync(User user)
+        public async Task<IActionResult> PutAsync([FromBody] User user)
         {
-            dataContext.Users.Update(user);
-            await dataContext.SaveChangesAsync();
-            return Ok(user);
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return Ok(user);
+            }
+            return BadRequest(result.Errors);
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteAsync(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(string id)
         {
-            var affectedRows = await dataContext.Users.Where(x => x.Id == id).ExecuteDeleteAsync();
-            if (affectedRows == 0)
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
             {
                 return NotFound();
             }
-            return NoContent();
+
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            return BadRequest(result.Errors);
         }
     }
 }

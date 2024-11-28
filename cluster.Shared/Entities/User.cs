@@ -1,32 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace cluster.Shared.Entities
 {
-    public class User
+    public class User : IdentityUser
     {
-        public int Id { get; set; }
-
         [Required]
-        [MaxLength(50, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
-        [Display(Name = "Usuario")]
-        public string Username { get; set; } = null!;
-
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Correo Electrónico")]
-        public string Email { get; set; } = null!;
-
-        [Required]
-        [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
-        [Display(Name = "Contraseña")]
-        public string Password { get; set; } = null!;
-
-        [Required]
-        [MaxLength(20, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
-        [Display(Name = "Rol")]
+        [MaxLength(20)]
         public string Role { get; set; } = null!;
 
-        public Player? Player { get; set; }  // Add this navigation property
+        public virtual Player? Player { get; set; }
     }
 }
