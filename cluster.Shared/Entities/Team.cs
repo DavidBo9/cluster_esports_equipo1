@@ -14,8 +14,8 @@ namespace cluster.Shared.Entities
         [Required]
         [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Display(Name = "Nombre del Equipo")]
-        public string TeamName { get; set; }
+        public string TeamName { get; set; } = null!;
 
-        public ICollection<Player> Players { get; set; }
+        public ICollection<Player> Players { get; set; } = null!;
     }
 }

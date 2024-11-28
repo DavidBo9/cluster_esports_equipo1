@@ -15,7 +15,7 @@ namespace cluster.Shared.Entities
         [Required]
         [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Display(Name = "Nombre del Torneo")]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [Required]
         [Display(Name = "Fecha de Inicio")]
@@ -23,18 +23,18 @@ namespace cluster.Shared.Entities
 
         [Required]
         [Display(Name = "Fecha de Fin")]
-        public DateTime EndDate { get; set; }
+        public DateTime EndDate { get; set; } 
 
         [Required]
         [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Display(Name = "Ubicación")]
-        public string Location { get; set; }
+        public string Location { get; set; } = null!;
 
         [Required]
         [MaxLength(30, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Display(Name = "Estado")]
-        public string Status { get; set; }
+        public string Status { get; set; } = null!;
 
-        public ICollection<Match> Matches { get; set; }
+        public ICollection<Match> Matches { get; set; } = null!;
     }
 }

@@ -31,10 +31,10 @@ namespace cluster.Shared.Entities
         [Required]
         [MaxLength(20, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Display(Name = "Puntuación")]
-        public string Score { get; set; }
+        public string Score { get; set; } = null!;
 
-        public Tournament Tournament { get; set; }
-        public Team Team1 { get; set; }
-        public Team Team2 { get; set; }
+        public Tournament Tournament { get; set; } = null!;
+        public Team Team1 { get; set; } = null!;
+        public Team Team2 { get; set; } = null!;
     }
 }
