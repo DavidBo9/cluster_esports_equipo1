@@ -14,12 +14,30 @@ namespace cluster.Api
             builder.Services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("con")));
 
+            // Add Seeder Service
+            builder.Services.AddScoped<Seeder>();
+
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            // Run seeder
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var seeder = services.GetRequiredService<Seeder>();
+                    seeder.SeedAsync().Wait(); // Since we're in a sync context, we use Wait()
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred while seeding the database: {ex.Message}");
+                }
+            }
 
             app.UseSwagger();
             app.MapGet("/", () => "Hello!");
